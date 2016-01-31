@@ -9,9 +9,9 @@ For example:
 
 ```
 const SERVICES_LIST = {
-  'nginx': 'Web Server',
-  'mysqld': 'SQL Server',
-  'php-fpm': 'PHP FPM',
-  'NetworkManager': 'Network Manager'
+  'nginx': {name: 'Web Server', user: false},
+  'mysqld': {name: 'SQL Server', user: false},
+  'php-fpm': {name: 'PHP FPM', user: false},
+  'btsync': {name: 'BitTorrent Sync', user: true},
 }
 ```
