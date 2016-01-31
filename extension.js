@@ -33,8 +33,8 @@ let lampAllServices     = 'lamp-all-services';
 let lampLoading         = 'lamp-loading';
 
 // My PopupSwitchMenu
-let menuItemApache;
-let menuItemMysql;
+// let menuItemApache;
+// let menuItemMysql;
 
 
 
@@ -86,17 +86,17 @@ const Indicator = new Lang.Class({
      * @this {Indicator}
      */
     _createMenu: function() {
-        menuItemApache = new PopupMenu.PopupSwitchMenuItem("Web Server", isApacheActive());
-        this.menu.addMenuItem(menuItemApache);
-        menuItemApache.statusAreaKey = "Web Server";
 
-        menuItemApache.connect('toggled', toggleApacheService);
+        for (var i in _config.SERVICES_LIST) {
+          let service = i;
 
-        menuItemMysql = new PopupMenu.PopupSwitchMenuItem("MySQL", isMysqlActive());
-        this.menu.addMenuItem(menuItemMysql);
-        menuItemMysql.statusAreaKey = "MySQL";
+          menuItemCustom = new PopupMenu.PopupSwitchMenuItem(_config.SERVICES_LIST[service], isServiceActive(service));
+          this.menu.addMenuItem(menuItemCustom);
+          menuItemCustom.statusAreaKey = _config.SERVICES_LIST[service];
 
-        menuItemMysql.connect('toggled', toggleMysqlService);
+          menuItemCustom.connect('toggled', function(){ toggleService(service); });
+
+        }
     },
 
 });
@@ -144,77 +144,48 @@ function init() {
     return new Extension();
 }
 
-
-
-function isApacheActive() {
-    // Get current status of apache service
-    let [resApache, outApache] = GLib.spawn_command_line_sync("systemctl is-active "+_config.SERVICENAME_WWWSRV);
-    let outApacheString = outApache.toString().replace(/(\r\n|\n|\r)/gm,"");
-    return outApacheString == "active";
-}
-
-function isMysqlActive() {
+function isServiceActive(service) {
     // Get current status of mysql service
-    let [resMysql, outMysql] = GLib.spawn_command_line_sync("systemctl is-active "+_config.SERVICENAME_DBSRV);
-    let outMysqlString = outMysql.toString().replace(/(\r\n|\n|\r)/gm,"");
-    return outMysqlString == "active";
+    let [resService, outService] = GLib.spawn_command_line_sync("systemctl is-active "+service);
+    let outServiceString = outService.toString().replace(/(\r\n|\n|\r)/gm,"");
+    return outServiceString == "active";
 }
 
-function toggleApacheService() {
+function toggleService(service) {
     let action = "start";
-    if (isApacheActive()) {
+    if (isServiceActive(service)) {
         action = "stop";
     }
     numbersOfPkexecProcess = getNumbersOfPkexecProcess();
 
-    let cmd = _config.PKEXEC_PATH + ' systemctl '+action+' '+_config.SERVICENAME_WWWSRV;
-    if (numbersOfTryToActivateApache == 0 && numbersOfTryToDesactivateApache == 0) {
+    let cmd = _config.PKEXEC_PATH + ' systemctl '+action+' '+service;
+    Main.notify(cmd);
+    // if (numbersOfTryToActivateApache == 0 && numbersOfTryToDesactivateApache == 0) {
 	    try {
             Util.trySpawnCommandLine(cmd);
-            statusIcon.set_property("style_class", lampLoading);
+            // statusIcon.set_property("style_class", lampLoading);
             if (action == "start") {
-                GLib.timeout_add(0,300,tryActivateApacheService);
+                GLib.timeout_add(0,300, function() { tryActivateService(service) });
             } else {
-                GLib.timeout_add(0,300,tryDesactivateApacheService);
+                GLib.timeout_add(0,300, function() { tryDesactivateService(service) });
             }
 	    } catch(Exception) {
 		  Main.notify("Crash !"+Exception);
 	    }
-	}
-}
-
-function toggleMysqlService() {
-    let action = "start";
-    if (isMysqlActive()) {
-        action = "stop";
-    }
-    numbersOfPkexecProcess = getNumbersOfPkexecProcess();
-
-    let cmd = _config.PKEXEC_PATH + ' systemctl '+action+' '+_config.SERVICENAME_DBSRV;
-    if (numbersOfTryToActivateMysql == 0 && numbersOfTryToDesactivateMysql == 0) {
-        try {
-            Util.trySpawnCommandLine(cmd);
-            statusIcon.set_property("style_class", lampLoading);
-            if (action == "start") {
-                GLib.timeout_add(0,300,tryActivateMysqlService);
-            } else {
-                GLib.timeout_add(0,300,tryDesactivateMysqlService);
-            }
-        } catch(Exception) {
-            Main.notify("Big problem :/"+Exception);
-        }
-    }
+	// }
 }
 
 
-function tryActivateApacheService() {
+
+
+function tryActivateService(service) {
     let serviceWaiting = true;
     // We want to activate Apache
-    if (numbersOfTryToActivateApache >= maxNumbersOfTry || isApacheActive()) {
+    if (numbersOfTryToActivateApache >= maxNumbersOfTry || isServiceActive(service)) {
         numbersOfTryToActivateApache = 0;
         if (!isPkExecThreadActive()){
             // PkExec is open ! don't do anything stupid
-            if (isApacheActive()) {
+            if (isServiceActive(service)) {
                 Main.notify("Web server is now on");
             } else {
                 Main.notify("Web server couldn't be activated");
@@ -230,15 +201,14 @@ function tryActivateApacheService() {
     return serviceWaiting;
 }
 
-
-function tryDesactivateApacheService() {
+function tryDesactivateService(service) {
     let serviceWaiting = true;
     // We want to desactivate Apache
-    if (numbersOfTryToDesactivateApache >= maxNumbersOfTry || !isApacheActive()) {
+    if (numbersOfTryToDesactivateApache >= maxNumbersOfTry || !isServiceActive(service)) {
         numbersOfTryToDesactivateApache = 0;
         if (!isPkExecThreadActive()){
             // PkExec is closed open ! don't do anything stupid
-            if (!isApacheActive()) {
+            if (!isServiceActive(service)) {
                 Main.notify("Web Server is now off");
             } else {
                 Main.notify("Web Server couldn't be deactivated");
@@ -254,55 +224,6 @@ function tryDesactivateApacheService() {
     return serviceWaiting;
 }
 
-
-function tryActivateMysqlService() {
-    let serviceWaiting = true;
-    // We want to activate Mysql
-    if (numbersOfTryToActivateMysql >= maxNumbersOfTry || isMysqlActive()) {
-        numbersOfTryToActivateMysql = 0;
-        if (!isPkExecThreadActive()){
-            // PkExec is closed open ! don't do anything stupid
-            if (isMysqlActive()) {
-                Main.notify("MySQL server is now on");
-            } else {
-                Main.notify("MySQL server couldn't be activated");
-            }
-            // No need to go to that loop again
-            refreshUI();
-            serviceWaiting = false;
-        }
-    } else {
-        //it's not over !
-        numbersOfTryToActivateMysql++;
-    }
-    return serviceWaiting;
-}
-
-
-function tryDesactivateMysqlService() {
-    let serviceWaiting = true;
-    // We want to desactivate Mysql
-    if (numbersOfTryToDesactivateMysql >= maxNumbersOfTry || !isMysqlActive()) {
-        numbersOfTryToDesactivateMysql = 0;
-        if (!isPkExecThreadActive()){
-            // PkExec is closed open ! don't do anything stupid
-            if (!isMysqlActive()) {
-                Main.notify("Mysql is now off");
-            } else {
-                Main.notify("MySQL couldn't be deactivated");
-            }
-            // No need to go to that loop again
-            refreshUI();
-            serviceWaiting = false;
-        }
-    } else {
-        //it's not over !
-        numbersOfTryToDesactivateMysql++;
-    }
-    return serviceWaiting;
-}
-
-
 function getNumbersOfPkexecProcess() {
     // Get current status of mysql service
     let [resPkExec, outPkExec] = GLib.spawn_command_line_sync("pgrep pkexec -c");
@@ -317,9 +238,7 @@ function isPkExecThreadActive() {
         res = false;
     }
     return res;
-
 }
-
 
 function refreshUI() {
     refreshStatusIcon();
@@ -343,6 +262,6 @@ function refreshStatusIcon() {
 }
 
 function refreshSwitchButton() {
-    menuItemApache.setToggleState(isApacheActive());
-    menuItemMysql.setToggleState(isMysqlActive());
+    // menuItemApache.setToggleState(isApacheActive());
+    // menuItemMysql.setToggleState(isMysqlActive());
 }
