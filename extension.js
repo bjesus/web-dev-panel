@@ -82,9 +82,9 @@ const Indicator = new Lang.Class({
         for (var i in _config.SERVICES_LIST) {
           let service = i;
 
-          menuItemCustom = new PopupMenu.PopupSwitchMenuItem(_config.SERVICES_LIST[service], isServiceActive(service));
+          menuItemCustom = new PopupMenu.PopupSwitchMenuItem(_config.SERVICES_LIST[service]['name'], isServiceActive(service));
           this.menu.addMenuItem(menuItemCustom);
-          menuItemCustom.statusAreaKey = _config.SERVICES_LIST[service];
+          menuItemCustom.statusAreaKey = _config.SERVICES_LIST[service]['name'];
 
           menuItemCustom.connect('toggled', function(){ toggleService(service); });
 
@@ -151,7 +151,6 @@ function toggleService(service) {
     numbersOfPkexecProcess = getNumbersOfPkexecProcess();
 
     let cmd = _config.PKEXEC_PATH + ' systemctl '+action+' '+service;
-    Main.notify(cmd);
     // if (numbersOfTryToActivateApache == 0 && numbersOfTryToDesactivateApache == 0) {
 	    try {
             Util.trySpawnCommandLine(cmd);
@@ -167,9 +166,6 @@ function toggleService(service) {
 	// }
 }
 
-
-
-
 function tryActivateService(service) {
     let serviceWaiting = true;
     // We want to activate Apache
@@ -178,9 +174,9 @@ function tryActivateService(service) {
         if (!isPkExecThreadActive()){
             // PkExec is open ! don't do anything stupid
             if (isServiceActive(service)) {
-                Main.notify("Web server is now on");
+                Main.notify(_config.SERVICES_LIST[service]['name']+" is now on");
             } else {
-                Main.notify("Web server couldn't be activated");
+                Main.notify(_config.SERVICES_LIST[service]['name']+" couldn't be activated");
             }
             // No need to go to that loop again
             refreshUI();
@@ -201,9 +197,9 @@ function tryDesactivateService(service) {
         if (!isPkExecThreadActive()){
             // PkExec is closed open ! don't do anything stupid
             if (!isServiceActive(service)) {
-                Main.notify("Web Server is now off");
+                Main.notify(_config.SERVICES_LIST[service]['name']+" is now off");
             } else {
-                Main.notify("Web Server couldn't be deactivated");
+                Main.notify(_config.SERVICES_LIST[service]['name']+" couldn't be deactivated");
             }
             // No need to go to that loop again
             refreshUI();

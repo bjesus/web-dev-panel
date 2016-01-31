@@ -40,8 +40,9 @@ const SERVICENAME_DBSRV     = 'mysqld';
 const PKEXEC_PATH           =  GLib.find_program_in_path('pkexec');
 
 const SERVICES_LIST         = {
-  'mysqld': 'SQL Server',
-  'nginx': 'Web Server',
-  'php-fpm': 'PHP FPM',
-  'NetworkManager': 'Network Manager'
+  'nginx': {name: 'Web Server', user: false},
+  'mysqld': {name: 'SQL Server', user: false},
+  'php-fpm': {name: 'PHP FPM', user: false},
+  'NetworkManager': {name: 'Network Manager', user: false},
+  'btsync': {name: 'BitTorrent Sync', user: true},
 }

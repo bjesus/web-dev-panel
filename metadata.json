@@ -1,11 +1,11 @@
 {
-  "description": "Manage web and database services from GUI panel",
-  "name": "Web Dev Panel",
+  "description": "Manage services from GUI panel",
+  "name": "Services Panel",
   "shell-version": [
     "3.16",
     "3.18"
   ],
   "url": "",
-  "uuid": "web-dev-panel@mediadoneright.com",
+  "uuid": "services-panel@bit-else.com",
   "version": 2
 }
