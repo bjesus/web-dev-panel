@@ -26,7 +26,7 @@
 // used as identifier when adding to status area
 const GLib = imports.gi.GLib;
 
-const EXTENSION_NAME = 'Web Dev Panel';
+const EXTENSION_NAME = 'Services Panel';
 
 
 // keys for access to gsettings
@@ -45,4 +45,5 @@ const SERVICES_LIST         = {
   'php-fpm': {name: 'PHP FPM', user: false},
   'NetworkManager': {name: 'Network Manager', user: false},
   'btsync': {name: 'BitTorrent Sync', user: true},
+  'redshift': {name: 'Redshift', user: true},
 }
