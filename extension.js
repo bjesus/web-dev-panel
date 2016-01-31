@@ -137,8 +137,12 @@ function init() {
 }
 
 function isServiceActive(service) {
-    // Get current status of mysql service
-    let [resService, outService] = GLib.spawn_command_line_sync("systemctl is-active "+service);
+    if (_config.SERVICES_LIST[service]['user']) {
+      var [resService, outService] = GLib.spawn_command_line_sync("systemctl is-active --user "+service);
+    } else {
+      var [resService, outService] = GLib.spawn_command_line_sync("systemctl is-active "+service);
+    }
+    let [resService, outService] = [resService, outService];
     let outServiceString = outService.toString().replace(/(\r\n|\n|\r)/gm,"");
     return outServiceString == "active";
 }
@@ -150,7 +154,14 @@ function toggleService(service) {
     }
     numbersOfPkexecProcess = getNumbersOfPkexecProcess();
 
-    let cmd = _config.PKEXEC_PATH + ' systemctl '+action+' '+service;
+    if (_config.SERVICES_LIST[service]['user']) {
+      var cmd = 'systemctl '+action+' --user '+service;
+    } else {
+      var cmd = _config.PKEXEC_PATH + ' systemctl '+action+' '+service;
+    }
+
+    let cmd = cmd;
+
     // if (numbersOfTryToActivateApache == 0 && numbersOfTryToDesactivateApache == 0) {
 	    try {
             Util.trySpawnCommandLine(cmd);
