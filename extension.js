@@ -58,14 +58,6 @@ const Indicator = new Lang.Class({
     _init: function(icon) {
         let icon_classname = lampNoServices;
 
-        if (isApacheActive() && isMysqlActive()) {
-            icon_classname = lampAllServices;
-        } else if (isApacheActive()) {
-            icon_classname = lampApacheServices;
-        } else if (isMysqlActive()) {
-            icon_classname = lampMysqlServices;
-        }
-
         this.parent(0.0, _config.EXTENSION_NAME);
 
         statusIcon = new St.Icon({
