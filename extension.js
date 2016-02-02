@@ -14,6 +14,11 @@ const PanelMenu = imports.ui.panelMenu;
 const GLib = imports.gi.GLib;
 const Util = imports.misc.util;
 
+const Convenience = Me.imports.convenience;
+
+const SETTINGS_KEY = 'services';
+
+
 let numbersOfTryToActivateMysql = 0;
 let numbersOfTryToDesactivateMysql = 0;
 
@@ -78,8 +83,16 @@ const Indicator = new Lang.Class({
      * @this {Indicator}
      */
     _createMenu: function() {
+        this._settings = Convenience.getSettings();
 
-        for (var i in _config.SERVICES_LIST) {
+        this._settings.connect('changed', Lang.bind(this, this._buildMenu));
+
+        this._buildMenu();
+
+    },
+    _buildMenu: function() {
+        this.menu.removeAll();
+        for (var i in this._parseData( this._settings.get_string(SETTINGS_KEY))) {
           let service = i;
 
           menuItemCustom = new PopupMenu.PopupSwitchMenuItem(_config.SERVICES_LIST[service]['name'], isServiceActive(service));
@@ -89,6 +102,19 @@ const Indicator = new Lang.Class({
           menuItemCustom.connect('toggled', function(){ toggleService(service); });
 
         }
+    },
+
+    _parseData: function(s) {
+      var parsed = {};
+      s = s.split(';');
+      s.forEach(function(service_line) { 
+        var t = service_line.split(',');
+        if (t[1]) {
+          parsed[t[1]] = {name: t[0], user: !!parseInt(t[2])}
+        }
+      });
+
+      return parsed;
     },
 
 });

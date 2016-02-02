@@ -1,0 +1,11 @@
+<schemalist gettext-domain="services-panel">
+
+  <schema id="org.gnome.shell.extensions.services-panel" path="/org/gnome/shell/extensions/services-panel/">
+    
+    <key name="services" type="s">
+      <default>'Web Server,nginx,0;MySQL Server,mysqld,0;'</default>
+      <summary>List of system services you want to control</summary>
+    </key>
+
+  </schema>
+</schemalist>
