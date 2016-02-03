@@ -61,7 +61,6 @@ const Widget = new GObject.Class({
 
     let displayColumn = new Gtk.TreeViewColumn({ title: _("Display Name") });
     let displayRenderer = new Gtk.CellRendererSpin({ editable: true });
-    displayRenderer.connect('edited', Lang.bind(this, this._workspaceEdited));
     displayColumn.pack_start(displayRenderer, true);
     displayColumn.add_attribute(displayRenderer, "text", Columns.DISPLAY_NAME);
     this._treeView.append_column(displayColumn);
@@ -69,7 +68,6 @@ const Widget = new GObject.Class({
 
     let unitColumn = new Gtk.TreeViewColumn({ title: _("Service Name") });
     let unitRenderer = new Gtk.CellRendererSpin({ editable: true });
-    unitRenderer.connect('edited', Lang.bind(this, this._workspaceEdited));
     unitColumn.pack_start(unitRenderer, true);
     unitColumn.add_attribute(unitRenderer, "text", Columns.SERVICE_NAME);
     this._treeView.append_column(unitColumn);
@@ -77,7 +75,6 @@ const Widget = new GObject.Class({
 
     let userColumn = new Gtk.TreeViewColumn({ title: _("User") });
     let userRenderer = new Gtk.CellRendererSpin({ editable: true });
-    userRenderer.connect('edited', Lang.bind(this, this._workspaceEdited));
     userColumn.pack_start(userRenderer, true);
     userColumn.add_attribute(userRenderer, "text", Columns.USER_UNIT);
     this._treeView.append_column(userColumn);
@@ -165,26 +162,7 @@ const Widget = new GObject.Class({
         return;
             }
 
-     //    let appInfo = dialog._appChooser.get_app_info();
-     //    if (!appInfo)
-        // return;
-     //    let index = Math.floor(dialog._spin.value);
-     //    if (isNaN(index) || index < 0)
-        // index = 1;
-
-     //    this._changedPermitted = false;
-     //    this._appendItem(appInfo.get_id(), index);
-     //    this._changedPermitted = true;
-
         let iter = this._store.append();
-     //    let adj = new Gtk.Adjustment({ lower: 1,
-        //                upper: WORKSPACE_MAX,
-        //                step_increment: 1,
-  //                                          value: index });
-        // this._store.set(iter,
-        //         [Columns.DISPLAY_NAME, Columns.SERVICE_NAME, Columns.USER_UNIT],
-        //         [dialog._display_name.get_text(), dialog._service_name.get_text(), dialog._user_service.get_active()]);
-
 
             var user_status = dialog._user_service.get_active() ? 1 : 0
             var user_status = user_status.toString();
@@ -223,21 +201,6 @@ const Widget = new GObject.Class({
     
       this._refresh();
     },
-
-    _workspaceEdited: function(renderer, pathString, text) {
-    let index = parseInt(text);
-    if (isNaN(index) || index < 0)
-        index = 1;
-        let path = Gtk.TreePath.new_from_string(pathString);
-    let [model, iter] = this._store.get_iter(path);
-    let appInfo = this._store.get_value(iter, Columns.APPINFO);
-
-    this._changedPermitted = false;
-    this._changeItem(appInfo.get_id(), index);
-    this._store.set_value(iter, Columns.WORKSPACE, index);
-    this._changedPermitted = true;
-    },
-
     _refresh: function() {
 
       this._store.clear();
@@ -252,68 +215,12 @@ const Widget = new GObject.Class({
           [Columns.DISPLAY_NAME, Columns.SERVICE_NAME, Columns.USER_UNIT],
           [services[service]['name'], service, services[service]['user']]);
       }
-
-
-
-
-    // if (!this._changedPermitted)
-    //     // Ignore this notification, model is being modified outside
-    //     return;
-
-    // this._store.clear();
-
-    // // let currentItems = this._settings.get_strv(SETTINGS_KEY);
-    // let currentItems = [];
-    // let validItems = [ ];
-    // for (let i = 0; i < currentItems.length; i++) {
-    //     let [id, index] = currentItems[i].split(':');
-    //     let appInfo = Gio.DesktopAppInfo.new(id);
-    //     if (!appInfo)
-    //     continue;
-    //     validItems.push(currentItems[i]);
-
-    //     let iter = this._store.append();
-    //     let adj = new Gtk.Adjustment({ lower: 1,
-    //                    upper: WORKSPACE_MAX,
-    //                    step_increment: 1,
-    //                                        value: index });
-    //     this._store.set(iter,
-    //             [Columns.APPINFO, Columns.ICON, Columns.DISPLAY_NAME, Columns.WORKSPACE, Columns.ADJUSTMENT],
-    //             [appInfo, appInfo.get_icon(), appInfo.get_display_name(), parseInt(index), adj]);
-    // }
-
-    // if (validItems.length != currentItems.length) // some items were filtered out
-    //     this._settings.set_strv(SETTINGS_KEY, validItems);
     },
-
-    _checkId: function(id) {
-        let items = this._settings.get_strv(SETTINGS_KEY);
-        return true;
-    },
-
-    _appendItem: function(id, workspace) {
-    let currentItems = this._settings.get_strv(SETTINGS_KEY);
-    currentItems.push(id + ':' + workspace);
-    this._settings.set_strv(SETTINGS_KEY, currentItems);
-    },
-
-    _changeItem: function(id, workspace) {
-    let currentItems = this._settings.get_strv(SETTINGS_KEY);
-    let index = currentItems.map(function(el) {
-        return el.split(':')[0];
-    }).indexOf(id);
-
-    if (index < 0)
-        currentItems.push(id + ':' + workspace);
-    else
-        currentItems[index] = id + ':' + workspace;
-    this._settings.set_strv(SETTINGS_KEY, currentItems);
-    }
 });
 
 
 function init() {
-    //Convenience.initTranslations();
+    // Convenience.initTranslations();
 }
 
 function buildPrefsWidget() {
