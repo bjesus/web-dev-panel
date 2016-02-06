@@ -37,11 +37,12 @@ let lampMysqlServices   = 'lamp-mysql-services';
 let lampAllServices     = 'lamp-all-services';
 let lampLoading         = 'lamp-loading';
 
+
 // My PopupSwitchMenu
 // let menuItemApache;
 // let menuItemMysql;
 
-
+let SERVICES_LIST = this._parseData( this._settings.get_string(SETTINGS_KEY));
 
 /*
  * Indicator class.
@@ -92,7 +93,7 @@ const Indicator = new Lang.Class({
     },
     _buildMenu: function() {
         this.menu.removeAll();
-        let SERVICES_LIST = this._parseData( this._settings.get_string(SETTINGS_KEY));
+
         for (var i in SERVICES_LIST) {
           let service = i;
 
@@ -164,7 +165,7 @@ function init() {
 }
 
 function isServiceActive(service) {
-    if (_config.SERVICES_LIST[service]['user']) {
+    if (SERVICES_LIST[service]['user']) {
       var [resService, outService] = GLib.spawn_command_line_sync("systemctl is-active --user "+service);
     } else {
       var [resService, outService] = GLib.spawn_command_line_sync("systemctl is-active "+service);
@@ -181,7 +182,7 @@ function toggleService(service) {
     }
     numbersOfPkexecProcess = getNumbersOfPkexecProcess();
 
-    if (_config.SERVICES_LIST[service]['user']) {
+    if (SERVICES_LIST[service]['user']) {
       var cmd = 'systemctl '+action+' --user '+service;
     } else {
       var cmd = _config.PKEXEC_PATH + ' systemctl '+action+' '+service;
@@ -212,9 +213,9 @@ function tryActivateService(service) {
         if (!isPkExecThreadActive()){
             // PkExec is open ! don't do anything stupid
             if (isServiceActive(service)) {
-                Main.notify(_config.SERVICES_LIST[service]['name']+" is now on");
+                Main.notify(SERVICES_LIST[service]['name']+" is now on");
             } else {
-                Main.notify(_config.SERVICES_LIST[service]['name']+" couldn't be activated");
+                Main.notify(SERVICES_LIST[service]['name']+" couldn't be activated");
             }
             // No need to go to that loop again
             refreshUI();
@@ -235,9 +236,9 @@ function tryDesactivateService(service) {
         if (!isPkExecThreadActive()){
             // PkExec is closed open ! don't do anything stupid
             if (!isServiceActive(service)) {
-                Main.notify(_config.SERVICES_LIST[service]['name']+" is now off");
+                Main.notify(SERVICES_LIST[service]['name']+" is now off");
             } else {
-                Main.notify(_config.SERVICES_LIST[service]['name']+" couldn't be deactivated");
+                Main.notify(SERVICES_LIST[service]['name']+" couldn't be deactivated");
             }
             // No need to go to that loop again
             refreshUI();
