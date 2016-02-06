@@ -42,7 +42,7 @@ let lampLoading         = 'lamp-loading';
 // let menuItemApache;
 // let menuItemMysql;
 
-let SERVICES_LIST = this._parseData( this._settings.get_string(SETTINGS_KEY));
+var SERVICES_LIST = {};
 
 /*
  * Indicator class.
@@ -93,6 +93,8 @@ const Indicator = new Lang.Class({
     },
     _buildMenu: function() {
         this.menu.removeAll();
+
+        SERVICES_LIST = this._parseData( this._settings.get_string(SETTINGS_KEY));
 
         for (var i in SERVICES_LIST) {
           let service = i;
