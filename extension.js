@@ -92,12 +92,13 @@ const Indicator = new Lang.Class({
     },
     _buildMenu: function() {
         this.menu.removeAll();
-        for (var i in this._parseData( this._settings.get_string(SETTINGS_KEY))) {
+        let SERVICES_LIST = this._parseData( this._settings.get_string(SETTINGS_KEY));
+        for (var i in SERVICES_LIST) {
           let service = i;
 
-          menuItemCustom = new PopupMenu.PopupSwitchMenuItem(_config.SERVICES_LIST[service]['name'], isServiceActive(service));
+          menuItemCustom = new PopupMenu.PopupSwitchMenuItem(SERVICES_LIST[service]['name'], isServiceActive(service));
           this.menu.addMenuItem(menuItemCustom);
-          menuItemCustom.statusAreaKey = _config.SERVICES_LIST[service]['name'];
+          menuItemCustom.statusAreaKey = SERVICES_LIST[service]['name'];
 
           menuItemCustom.connect('toggled', function(){ toggleService(service); });
 
