@@ -18,12 +18,8 @@ const Convenience = Me.imports.convenience;
 
 const SETTINGS_KEY = 'services';
 
-
-let numbersOfTryToActivateMysql = 0;
-let numbersOfTryToDesactivateMysql = 0;
-
-let numbersOfTryToActivateApache = 0;
-let numbersOfTryToDesactivateApache = 0;
+let numbersOfTryToActivateService = 0;
+let numbersOfTryToDeactivateService = 0;
 
 let numbersOfPkexecProcess = 0;
 
@@ -31,12 +27,7 @@ let maxNumbersOfTry = 8;
 
 // StatusIcon manager
 let statusIcon;
-let lampNoServices      = 'lamp-no-services';
-let lampApacheServices  = 'lamp-apache-services';
-let lampMysqlServices   = 'lamp-mysql-services';
-let lampAllServices     = 'lamp-all-services';
-let lampLoading         = 'lamp-loading';
-
+let defaultIcon      = 'services-panel';
 
 // My PopupSwitchMenu
 // let menuItemApache;
@@ -62,7 +53,7 @@ const Indicator = new Lang.Class({
      * @param {string} icon an icon name
      */
     _init: function(icon) {
-        let icon_classname = lampNoServices;
+        let icon_classname = defaultIcon;
 
         this.parent(0.0, _config.EXTENSION_NAME);
 
@@ -111,7 +102,7 @@ const Indicator = new Lang.Class({
     _parseData: function(s) {
       var parsed = {};
       s = s.split(';');
-      s.forEach(function(service_line) { 
+      s.forEach(function(service_line) {
         var t = service_line.split(',');
         if (t[1]) {
           parsed[t[1]] = {name: t[0], user: !!parseInt(t[2])}
@@ -192,26 +183,25 @@ function toggleService(service) {
 
     let cmd = cmd;
 
-    // if (numbersOfTryToActivateApache == 0 && numbersOfTryToDesactivateApache == 0) {
-	    try {
-            Util.trySpawnCommandLine(cmd);
-            // statusIcon.set_property("style_class", lampLoading);
-            if (action == "start") {
-                GLib.timeout_add(0,300, function() { tryActivateService(service) });
-            } else {
-                GLib.timeout_add(0,300, function() { tryDesactivateService(service) });
-            }
-	    } catch(Exception) {
-		  Main.notify("Crash !"+Exception);
-	    }
-	// }
+    try {
+          Util.trySpawnCommandLine(cmd);
+          // statusIcon.set_property("style_class", lampLoading);
+          if (action == "start") {
+              GLib.timeout_add(0,300, function() { tryActivateService(service) });
+          } else {
+              GLib.timeout_add(0,300, function() { tryDeactivateService(service) });
+          }
+    } catch(Exception) {
+	  Main.notify("Crash !"+Exception);
+    }
+
 }
 
 function tryActivateService(service) {
     let serviceWaiting = true;
     // We want to activate Apache
-    if (numbersOfTryToActivateApache >= maxNumbersOfTry || isServiceActive(service)) {
-        numbersOfTryToActivateApache = 0;
+    if (numbersOfTryToActivateService >= maxNumbersOfTry || isServiceActive(service)) {
+        numbersOfTryToActivateService = 0;
         if (!isPkExecThreadActive()){
             // PkExec is open ! don't do anything stupid
             if (isServiceActive(service)) {
@@ -225,16 +215,16 @@ function tryActivateService(service) {
         }
     } else {
         //it's not over !
-        numbersOfTryToActivateApache++;
+        numbersOfTryToActivateService++;
     }
     return serviceWaiting;
 }
 
-function tryDesactivateService(service) {
+function tryDeactivateService(service) {
     let serviceWaiting = true;
     // We want to desactivate Apache
-    if (numbersOfTryToDesactivateApache >= maxNumbersOfTry || !isServiceActive(service)) {
-        numbersOfTryToDesactivateApache = 0;
+    if (numbersOfTryToDeactivateService >= maxNumbersOfTry || !isServiceActive(service)) {
+        numbersOfTryToDeactivateService = 0;
         if (!isPkExecThreadActive()){
             // PkExec is closed open ! don't do anything stupid
             if (!isServiceActive(service)) {
@@ -248,7 +238,7 @@ function tryDesactivateService(service) {
         }
     } else {
         //it's not over !
-        numbersOfTryToDesactivateApache++;
+        numbersOfTryToDeactivateService++;
     }
     return serviceWaiting;
 }
@@ -275,18 +265,7 @@ function refreshUI() {
 }
 
 function refreshStatusIcon() {
-    let icon_classname = lampNoServices;
-
-    if (isApacheActive() && isMysqlActive()) {
-        icon_classname = lampAllServices;
-    } else if (isApacheActive()) {
-        icon_classname = lampApacheServices;
-    } else if (isMysqlActive()) {
-        icon_classname = lampMysqlServices;
-    } else {
-        icon_classname = lampNoServices;
-    }
-
+    let icon_classname = defaultIcon;
     statusIcon.set_property("style_class", icon_classname);
 }
 
